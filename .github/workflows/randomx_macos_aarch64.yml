@@ -1,0 +1,26 @@
+name: RandomX macOS aarch64
+
+on: [workflow_dispatch]
+
+jobs:
+  build-macos-aarch64:
+
+    timeout-minutes: 1
+    runs-on: macos-latest-xlarge
+
+    steps:
+    - name: Checkout RandomX
+      uses: actions/checkout@v3
+      with:
+        repository: SChernykh/RandomX
+        ref: aarch64-clear-cache
+
+    - name: Build RandomX
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make -j6
+
+    - name: Run RandomX tests
+      run: build/randomx-tests
