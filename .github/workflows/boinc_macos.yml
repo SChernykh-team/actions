@@ -1,0 +1,56 @@
+name: BOINC macOS
+
+on: [push]
+
+jobs:
+  build-macos:
+    timeout-minutes: 60
+    runs-on: ${{ matrix.config.os }}
+
+    strategy:
+      matrix:
+        allow_failure: [true]
+        config:
+          - {os: macos-11}
+          - {os: macos-12}
+          - {os: macos-13}
+
+    steps:
+    - name: Checkout BOINC
+      run: |
+        git clone https://github.com/SChernykh/boinc
+        cd boinc
+        git checkout client_release/7/7.24
+
+    - name: Build BOINC libs
+      run: |
+        cd boinc/mac_build
+        source BuildMacBOINC.sh -target libboinc -target api_libboinc -target boinc_opencl
+
+    - name: Checkout Amicable
+      run: |
+        git clone https://github.com/SChernykh/Amicable
+        cd Amicable
+        git checkout boinc-opencl-version-128-bit
+
+    - name: Build Amicable
+      run: |
+        clang --version
+        cd Amicable
+        mkdir release
+        clang -x c++ -target x86_64-apple-macos10.13 -framework OpenCL -std=c++11 -stdlib=libc++ -o release/amicable -O3 -I primesieve/include -I Amicable -I ../boinc/api -I ../boinc/lib Amicable/*.cpp primesieve/src/primesieve/*.cpp -L ../boinc/mac_build/build/Deployment -Wno-deprecated-declarations -lboinc -lboinc_api -lboinc_opencl -lc++
+        strip release/amicable
+        file -I release/amicable
+        otool -l release/amicable
+
+    - name: Run Amicable
+      continue-on-error: true
+      run: |
+        cd Amicable/release
+        ./amicable /lpr 100000000000 100000010000 /task_size 100000000000
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: amicable-${{ matrix.config.os }}
+        path: Amicable/release
