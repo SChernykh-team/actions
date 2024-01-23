@@ -38,7 +38,7 @@ jobs:
         clang --version
         cd Amicable
         mkdir release
-        clang -x c++ -target x86_64-apple-macos10.13 -framework OpenCL -std=c++11 -stdlib=libc++ -o release/amicable -O3 -I primesieve/include -I Amicable -I ../boinc/api -I ../boinc/lib Amicable/*.cpp primesieve/src/primesieve/*.cpp -L ../boinc/mac_build/build/Deployment -Wno-deprecated-declarations -lboinc -lboinc_api -lboinc_opencl -lc++
+        clang -x c++ -target x86_64-apple-macos10.13 -framework OpenCL -std=c++17 -stdlib=libc++ -o release/amicable -O3 -I primesieve/include -I Amicable -I ../boinc/api -I ../boinc/lib Amicable/*.cpp primesieve/src/primesieve/*.cpp -L ../boinc/mac_build/build/Deployment -Wno-deprecated-declarations -lboinc -lboinc_api -lboinc_opencl -lc++
         strip release/amicable
         file -I release/amicable
         otool -l release/amicable
