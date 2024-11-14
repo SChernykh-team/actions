@@ -11,9 +11,10 @@ jobs:
       matrix:
         allow_failure: [true]
         config:
-          - {os: macos-11}
-          - {os: macos-12}
-          - {os: macos-13}
+          - {os: macos-12, target: x86_64-apple-macos10.13}
+          - {os: macos-13, target: x86_64-apple-macos10.13}
+          - {os: macos-14, target: arm64-apple-macos-11}
+          - {os: macos-15, target: arm64-apple-macos-11}
 
     steps:
     - name: Checkout BOINC
@@ -38,7 +39,7 @@ jobs:
         clang --version
         cd Amicable
         mkdir release
-        clang -x c++ -target x86_64-apple-macos10.13 -framework OpenCL -std=c++17 -stdlib=libc++ -o release/amicable -O3 -I primesieve/include -I Amicable -I ../boinc/api -I ../boinc/lib Amicable/*.cpp primesieve/src/primesieve/*.cpp -L ../boinc/mac_build/build/Deployment -Wno-deprecated-declarations -lboinc -lboinc_api -lboinc_opencl -lc++
+        clang -x c++ -target ${{ matrix.config.target }} -framework OpenCL -std=c++17 -stdlib=libc++ -o release/amicable -O3 -I primesieve/include -I Amicable -I ../boinc/api -I ../boinc/lib Amicable/*.cpp primesieve/src/primesieve/*.cpp -L ../boinc/mac_build/build/Deployment -Wno-deprecated-declarations -lboinc -lboinc_api -lboinc_opencl -lc++
         strip release/amicable
         file -I release/amicable
         otool -l release/amicable
