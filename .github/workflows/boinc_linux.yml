@@ -1,0 +1,44 @@
+name: BOINC Linux
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build-linux:
+    timeout-minutes: 60
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Install libs
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential gcc g++ make cmake opencl-headers ocl-icd-opencl-dev
+
+    - name: Checkout BOINC
+      run: |
+        git clone https://github.com/SChernykh/boinc
+        cd boinc
+        git checkout client_release/7/7.24
+
+    - name: Build BOINC libs
+      run: |
+        cd boinc
+        ./_autosetup
+        ./configure --disable-client --disable-server --disable-manager LDFLAGS=-static-libgcc
+        make -j$(nproc)
+
+    - name: Checkout Amicable
+      run: |
+        git clone https://github.com/SChernykh/Amicable
+        cd Amicable
+        git checkout boinc-opencl-version-128-bit
+
+    - name: Build Amicable
+      run: |
+        cd Amicable
+        make -j$(nproc)
+
+    - name: Upload
+      uses: actions/upload-artifact@v7
+      with:
+        name: amicable-linux
+        path: Amicable/release
